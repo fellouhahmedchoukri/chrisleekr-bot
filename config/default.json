@@ -1,85 +1,180 @@
 {
   "mode": "test",
   "tz": "Australia/Melbourne",
-  "appName": "Binance Grid Trading Bot",
+  "appName": "Binance Trading Bot",
   "demoMode": false,
   "frontend": {
     "port": 80
   },
   "binance": {
     "live": {
-      "apiKey": "VOTRE_CLE_API_LIVE",
-      "secretKey": "VOTRE_SECRET_API_LIVE"
+      "apiKey": "",
+      "secretKey": ""
     },
     "test": {
-      "apiKey": "kbLfWrT36Hoi7Etr4PTYRS0u1VZCiCP03utrIRBH34zZND4jhYBJtZgTscVbHcvt",
-      "secretKey": "wRUYPv7Glvy7Ie3EyakKRDUm0eMFmRHRF1jDTaoXYPy8jp8N31zWnjGBe0IAFL38"
+      "apiKey": "",
+      "secretKey": ""
     }
   },
   "redis": {
-    "host": "localhost",
+    "host": "binance-redis",
     "port": 6379,
     "password": "",
     "db": 0
   },
   "mongo": {
-    "host": "localhost",
+    "host": "binance-mongo",
     "port": 27017,
-    "database": "grid-trading-bot"
+    "database": "binance-bot"
   },
   "tradingview": {
-    "host": "localhost",
+    "host": "tradingview",
     "port": 8080,
-    "webhookPassphrase": "#1960AlGeR@+="
+    "webhookPassphrase": "#1960AlGeR@+="  // Échappement ajouté
   },
   "slack": {
-    "enabled": false
+    "enabled": false,
+    "webhookUrl": "",
+    "channel": "",
+    "username": ""
   },
   "localTunnel": {
-    "enabled": false
+    "enabled": true,
+    "subdomain": "default"
   },
   "featureToggle": {
     "notifyOrderConfirm": true,
-    "notifyDebug": true,
+    "notifyDebug": false,
     "notifyOrderExecute": true
   },
   "authentication": {
-    "enabled": false
+    "enabled": true,
+    "password": "123456",
+    "loginLimiter": {
+      "maxConsecutiveFails": 5,
+      "duration": 10800,
+      "blockDuration": 900
+    }
   },
   "jobs": {
     "alive": {
-      "enabled": false
+      "enabled": true,
+      "cronTime": "0 0 9 * * *"
     },
     "trailingTrade": {
-      "enabled": false
+      "enabled": true,
+      "cronTime": "* * * * * *",
+      "symbols": ["BTCUSDT", "ETHUSDT", "ETHBTC", "XRPBTC"],
+      "botOptions": {
+        "authentication": {
+          "lockList": true,
+          "lockAfter": 120
+        },
+        "autoTriggerBuy": {
+          "enabled": false,
+          "triggerAfter": 20,
+          "conditions": {
+            "whenLessThanATHRestriction": true,
+            "afterDisabledPeriod": true
+          }
+        },
+        "orderLimit": {
+          "enabled": true,
+          "maxBuyOpenOrders": 3,
+          "maxOpenTrades": 5
+        },
+        "tradingViews": [
+          {
+            "interval": "1h",
+            "buy": {
+              "whenStrongBuy": true,
+              "whenBuy": true
+            },
+            "sell": {
+              "forceSellOverZeroBelowTriggerPrice": {
+                "whenNeutral": false,
+                "whenSell": false,
+                "whenStrongSell": false
+              }
+            }
+          }
+        ],
+        "tradingViewOptions": {
+          "useOnlyWithin": 5,
+          "ifExpires": "ignore"
+        },
+        "logs": {
+          "deleteAfter": 30
+        }
+      },
+      "candles": {
+        "interval": "1h",
+        "limit": 100
+      },
+      "buy": {
+        "enabled": true,
+        "gridTrade": [
+          {
+            "triggerPercentage": 1,
+            "stopPercentage": 1.02,
+            "limitPercentage": 1.021,
+            "minPurchaseAmount": -1,
+            "minPurchaseAmounts": {},
+            "maxPurchaseAmount": -1,
+            "maxPurchaseAmounts": {}
+          }
+        ],
+        "lastBuyPriceRemoveThreshold": -1,
+        "lastBuyPriceRemoveThresholds": {},
+        "athRestriction": {
+          "enabled": true,
+          "candles": {
+            "interval": "1d",
+            "limit": 30
+          },
+          "restrictionPercentage": 0.9
+        }
+      },
+      "sell": {
+        "enabled": true,
+        "gridTrade": [
+          {
+            "triggerPercentage": 1.06,
+            "stopPercentage": 0.98,
+            "limitPercentage": 0.979,
+            "quantityPercentage": -1,
+            "quantityPercentages": {}
+          }
+        ],
+        "stopLoss": {
+          "enabled": false,
+          "maxLossPercentage": 0.8,
+          "disableBuyMinutes": 360,
+          "orderType": "market"
+        },
+        "conservativeMode": {
+          "enabled": false,
+          "factor": 0.5
+        }
+      },
+      "system": {
+        "temporaryDisableActionAfterConfirmingOrder": 20,
+        "checkManualOrderPeriod": 5,
+        "placeManualOrderInterval": 5,
+        "refreshAccountInfoPeriod": 1,
+        "checkOrderExecutePeriod": 10
+      }
     },
     "trailingTradeIndicator": {
-      "enabled": false
+      "enabled": true,
+      "cronTime": "* * * * * *"
     },
     "tradingView": {
       "enabled": true,
-      "cronTime": "* * * * * *",
-      "webhook": {
-        "enabled": true,
-        "path": "/webhook",
-        "passphrase": "#1960AlGeR@+="
-      }
+      "cronTime": "* * * * * *"
     }
   },
-  "gridStrategy": {
-    "enabled": true,
-    "levels": 10,
-    "takeProfitLevel": "Grid level 1",
-    "stopLoss": {
-      "enabled": true,
-      "price": 0.00
-    }
-  }
-}
-{
-  // ... configuration existante ...
-  
-  "gridStrategy": {
+  "gridStrategy": {  // Section ajoutée CORRECTEMENT
     "defaultLevels": 10,
     "maxInvestmentPercentage": 20,
     "riskManagement": {

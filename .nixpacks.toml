@@ -1,11 +1,19 @@
 [phases.setup]
-nixPkgs = ["nodejs-18_x", "python310"]
+nixPkgs = [
+  "nodejs-18_x",
+  "python310",
+  "mongodb-tools",
+  "redis"
+]
 
 [phases.install]
 cmds = ["npm install"]
 
 [phases.build]
-cmds = ["npm run build:webpack", "npm run build:grunt"]
+cmds = [
+  "npm run build:webpack",
+  "npm run build:grunt"
+]
 
 [start]
 cmd = "npm start"

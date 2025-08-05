@@ -1,19 +1,23 @@
-// app/core/binance.js
-
-async function getPositions({ symbol }) {
+// Ajouter cette fonction
+async function cancelAllOrders(symbol) {
   try {
-    const account = await this.client.accountInfo();
-    return account.positions.filter(
-      p => p.symbol === symbol && parseFloat(p.positionAmt) !== 0
-    );
+    const orders = await this.client.openOrders({ symbol });
+    for (const order of orders) {
+      await this.client.cancelOrder({
+        symbol,
+        orderId: order.orderId
+      });
+    }
+    return true;
   } catch (error) {
-    logger.error('getPositions error', error);
-    return [];
+    logger.error('cancelAllOrders error', error);
+    return false;
   }
 }
 
-// Ajouter à l'export
+// Modifier l'export
 module.exports = {
-  ...,
+  // ... autres fonctions ...
+  cancelAllOrders,
   getPositions
 };

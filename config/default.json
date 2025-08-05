@@ -1,9 +1,78 @@
 {
-  "binance": {
-    "apiKey": "YOUR_API_KEY",
-    "apiSecret": "YOUR_API_SECRET"
+  "mode": "test",
+  "tz": "Australia/Melbourne",
+  "appName": "Binance Grid Trading Bot",
+  "demoMode": false,
+  "frontend": {
+    "port": 80
   },
-  "tradingView": {
+  "binance": {
+    "live": {
+      "apiKey": "VOTRE_CLE_API_LIVE",
+      "secretKey": "VOTRE_SECRET_API_LIVE"
+    },
+    "test": {
+      "apiKey": "kbLfWrT36Hoi7Etr4PTYRS0u1VZCiCP03utrIRBH34zZND4jhYBJtZgTscVbHcvt",
+      "secretKey": "wRUYPv7Glvy7Ie3EyakKRDUm0eMFmRHRF1jDTaoXYPy8jp8N31zWnjGBe0IAFL38"
+    }
+  },
+  "redis": {
+    "host": "localhost",
+    "port": 6379,
+    "password": "",
+    "db": 0
+  },
+  "mongo": {
+    "host": "localhost",
+    "port": 27017,
+    "database": "grid-trading-bot"
+  },
+  "tradingview": {
+    "host": "localhost",
+    "port": 8080,
     "webhookPassphrase": "#1960AlGeR@+="
+  },
+  "slack": {
+    "enabled": false
+  },
+  "localTunnel": {
+    "enabled": false
+  },
+  "featureToggle": {
+    "notifyOrderConfirm": true,
+    "notifyDebug": true,
+    "notifyOrderExecute": true
+  },
+  "authentication": {
+    "enabled": false
+  },
+  "jobs": {
+    "alive": {
+      "enabled": false
+    },
+    "trailingTrade": {
+      "enabled": false
+    },
+    "trailingTradeIndicator": {
+      "enabled": false
+    },
+    "tradingView": {
+      "enabled": true,
+      "cronTime": "* * * * * *",
+      "webhook": {
+        "enabled": true,
+        "path": "/webhook",
+        "passphrase": "#1960AlGeR@+="
+      }
+    }
+  },
+  "gridStrategy": {
+    "enabled": true,
+    "levels": 10,
+    "takeProfitLevel": "Grid level 1",
+    "stopLoss": {
+      "enabled": true,
+      "price": 0.00
+    }
   }
 }

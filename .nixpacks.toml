@@ -18,5 +18,6 @@ cmd = "npm start"
 
 [healthcheck]
 path = "/health"
-interval = 10
-timeout = 5
+interval = 5  # Vérifie toutes les 5 secondes
+timeout = 10   # Délai d'attente de 10 secondes
+start_period = 30  # Donne 30 secondes à l'app pour démarrer

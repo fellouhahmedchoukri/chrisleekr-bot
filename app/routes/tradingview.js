@@ -1,82 +1,96 @@
-// app/routes/tradingview.js
-
-const express = require('express');
-const router = express.Router();
+// app/services/grid-engine.js
 const binance = require('../core/binance');
 const logger = require('../core/logger');
-const config = require('config');
 
-router.post('/', async (req, res) => {
-  const { passphrase, action, symbol, price, quantity } = req.body;
-
-  // Vérification de la passphrase
-  if (passphrase !== config.tradingview.webhookPassphrase) {
-    logger.error('Invalid passphrase');
-    return res.status(401).json({ error: 'Invalid passphrase' });
-  }
-
-  // Gestion des actions de la stratégie grid
-  try {
-    const cleanSymbol = symbol.replace(':', ''); // Nettoyage du symbole
-
-    if (action === 'grid_buy') {
-      // Placement d'un ordre limite d'achat
-      const order = {
-        symbol: cleanSymbol,
-        side: 'BUY',
-        type: 'LIMIT',
-        price: parseFloat(price),
-        quantity: parseFloat(quantity),
-        timeInForce: 'GTC'
-      };
+module.exports = {
+  async deployGridStrategy(params) {
+    const { symbol, upperPrice, lowerPrice, levels, investment, stopLoss } = params;
+    
+    try {
+      // 1. Annuler les ordres existants
+      await binance.cancelAllOrders(symbol);
       
-      await binance.order(order);
-      logger.info(`Placed grid buy order: ${cleanSymbol} @ ${price} x ${quantity}`);
-      return res.json({ status: 'Placed grid buy order' });
+      // 2. Calculer les niveaux de la grille
+      const gridLevels = this.calculateGridLevels(upperPrice, lowerPrice, levels, investment);
+      
+      // 3. Placer les ordres
+      const orders = [];
+      for (const level of gridLevels) {
+        const order = await binance.order({
+          symbol,
+          side: 'BUY',
+          type: 'LIMIT',
+          price: level.price,
+          quantity: level.quantity,
+          timeInForce: 'GTC'
+        });
+        orders.push(order);
+        logger.info(`Grid order placed: ${level.quantity} ${symbol} @ ${level.price}`);
+      }
+      
+      // 4. Gérer le stop-loss
+      if (stopLoss > 0) {
+        await binance.order({
+          symbol,
+          side: 'SELL',
+          type: 'STOP_LOSS_LIMIT',
+          stopPrice: stopLoss,
+          price: stopLoss * 0.995,
+          quantity: gridLevels.reduce((sum, level) => sum + level.quantity, 0),
+          timeInForce: 'GTC'
+        });
+        logger.info(`Stop-loss set @ ${stopLoss} for ${symbol}`);
+      }
+      
+      return orders;
+      
+    } catch (error) {
+      logger.error('Grid deployment failed:', error);
+      throw error;
     }
+  },
 
-    if (action === 'grid_destroyed') {
-      // Fermeture de toutes les positions
-      const positions = await binance.getPositions({ symbol: cleanSymbol });
+  calculateGridLevels(upper, lower, levels, investment) {
+    const range = upper - lower;
+    const step = range / (levels - 1);
+    const investmentPerLevel = investment / levels;
+    
+    return Array.from({length: levels}, (_, i) => {
+      const price = upper - (i * step);
+      return {
+        price: parseFloat(price.toFixed(6)),
+        quantity: parseFloat((investmentPerLevel / price).toFixed(8))
+      };
+    });
+  },
+
+  async closeGridPositions(symbol) {
+    try {
+      // 1. Annuler tous les ordres
+      await binance.cancelAllOrders(symbol);
       
+      // 2. Fermer les positions
+      const positions = await binance.getPositions({ symbol });
       let closedCount = 0;
+      
       for (const position of positions) {
-        const positionAmt = parseFloat(position.positionAmt);
-        
-        if (positionAmt !== 0) {
-          const side = positionAmt > 0 ? 'SELL' : 'BUY';
-          
+        const amount = parseFloat(position.positionAmt);
+        if (amount !== 0) {
           await binance.order({
-            symbol: cleanSymbol,
-            side: side,
+            symbol,
+            side: amount > 0 ? 'SELL' : 'BUY',
             type: 'MARKET',
-            quantity: Math.abs(positionAmt)
+            quantity: Math.abs(amount)
           });
-          
           closedCount++;
-          logger.info(`Closed position: ${cleanSymbol} ${side} ${Math.abs(positionAmt)}`);
         }
       }
       
-      return res.json({ 
-        status: 'Grid destroyed - positions closed',
-        closedCount: closedCount
-      });
+      return closedCount;
+      
+    } catch (error) {
+      logger.error('Grid closure failed:', error);
+      throw error;
     }
-
-    // Si l'action n'est pas reconnue, passer au traitement standard
-    logger.warn(`Unhandled grid action: ${action}`);
-    return res.status(400).json({ error: 'Unhandled action type' });
-
-  } catch (error) {
-    logger.error(`Grid action error: ${error.message}`, {
-      action,
-      symbol,
-      price,
-      quantity
-    });
-    return res.status(500).json({ error: 'Failed to execute grid action' });
   }
-});
-
-module.exports = router;
+};

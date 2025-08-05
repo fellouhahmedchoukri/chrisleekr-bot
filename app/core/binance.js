@@ -1,20 +1,17 @@
-// binance.js - Ajoutez cette méthode
-async function getPositions({ symbol }) {
+module.exports.closeAllPositions = async function(symbol) {
   try {
-    const account = await client.accountInfo();
-    return account.positions.filter(
-      p => p.symbol === symbol && parseFloat(p.positionAmt) !== 0
-    );
+    const positions = await this.client.getPositions({ symbol });
+    for (const position of positions) {
+      if (parseFloat(position.positionAmt) !== 0) {
+        await this.client.order({
+          symbol,
+          side: parseFloat(position.positionAmt) > 0 ? 'SELL' : 'BUY',
+          type: 'MARKET',
+          quantity: Math.abs(parseFloat(position.positionAmt))
+        });
+      }
+    }
   } catch (error) {
-    console.error('getPositions error:', error);
-    return [];
+    logger.error('closeAllPositions error', error);
   }
-}
-
-// Exportez la nouvelle méthode
-module.exports = {
-  getAccount,
-  getPositions, // Nouveau
-  order,
-  // ... autres méthodes
 };

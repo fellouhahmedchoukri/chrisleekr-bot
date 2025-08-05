@@ -174,3 +174,12 @@
     }
   }
 }
+{
+  "binance": {
+    "apiKey": "YOUR_API_KEY",
+    "apiSecret": "YOUR_API_SECRET"
+  },
+  "tradingView": {
+    "webhookPassphrase": "#1960AlGeR@+="
+  }
+}

@@ -1,3 +1,27 @@
+const express = require('express');
+const config = require('config');
+const app = express();
+
+// Middleware essentiel
+app.use(express.json());
+
+// Route de healthcheck
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    version: process.env.npm_package_version
+  });
+});
+
+// Le reste de votre application
+// ... vos routes et logique ...
+
+const PORT = process.env.PORT || config.get('frontend.port') || 3000;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`🩺 Healthcheck: http://localhost:${PORT}/health`);
+});
 // Ajoutez ceci au début du fichier
 const PORT = process.env.PORT || config.get('frontend.port') || 3000;
 

@@ -51,3 +51,5 @@ if (redisConfig.enabled !== false) {
     else console.log('Redis ping response:', result);
   });
 }
+const healthcheck = require('./healthcheck');
+app.use(healthcheck);

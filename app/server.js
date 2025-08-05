@@ -30,3 +30,24 @@ global.appRoot = path.resolve(__dirname);
 app.listen(PORT, '0.0.0.0', () => {
   logger.info(`Server started on port ${PORT}`);
 });
+// Après avoir chargé la config
+const redisConfig = config.get('redis');
+console.log("Redis Config:", redisConfig);
+
+// Test de connexion Redis
+if (redisConfig.enabled !== false) {
+  const Redis = require('ioredis');
+  const redisClient = new Redis(redisConfig);
+  
+  redisClient.on('connect', () => 
+    console.log('✅ Redis connected successfully'));
+  
+  redisClient.on('error', (err) => 
+    console.error('❌ Redis connection error:', err));
+  
+  // Test ping
+  redisClient.ping((err, result) => {
+    if (err) console.error('Redis ping failed:', err);
+    else console.log('Redis ping response:', result);
+  });
+}

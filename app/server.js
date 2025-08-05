@@ -1,3 +1,6 @@
+// Ajoutez ceci au début du fichier
+const PORT = process.env.PORT || config.get('frontend.port') || 3000;
+
 const path = require('path');
 const { logger: rootLogger, mongo } = require('./helpers');
 const { runBinance } = require('./server-binance');
@@ -22,3 +25,8 @@ global.appRoot = path.resolve(__dirname);
     runFrontend(logger)
   ]);
 })();
+
+// Modifiez le démarrage du serveur
+app.listen(PORT, '0.0.0.0', () => {
+  logger.info(`Server started on port ${PORT}`);
+});

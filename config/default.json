@@ -12,8 +12,8 @@
       "secretKey": ""
     },
     "test": {
-      "apiKey": "",
-      "secretKey": ""
+      "apiKey": "VOTRE_CLE_API",
+      "secretKey": "VOTRE_SECRET_API"
     }
   },
   "redis": {
@@ -30,7 +30,7 @@
   "tradingview": {
     "host": "tradingview",
     "port": 8080,
-    "webhookPassphrase": "#1960AlGeR@+="  // Échappement ajouté
+    "webhookPassphrase": "#1960AlGeR@+="
   },
   "slack": {
     "enabled": false,
@@ -62,7 +62,7 @@
       "cronTime": "0 0 9 * * *"
     },
     "trailingTrade": {
-      "enabled": true,
+      "enabled": false,
       "cronTime": "* * * * * *",
       "symbols": ["BTCUSDT", "ETHUSDT", "ETHBTC", "XRPBTC"],
       "botOptions": {
@@ -174,7 +174,8 @@
       "cronTime": "* * * * * *"
     }
   },
-  "gridStrategy": {  // Section ajoutée CORRECTEMENT
+  "gridStrategy": {
+    "enabled": true,
     "defaultLevels": 10,
     "maxInvestmentPercentage": 20,
     "riskManagement": {

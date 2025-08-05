@@ -1,17 +1,19 @@
-module.exports.closeAllPositions = async function(symbol) {
+// app/core/binance.js
+
+async function getPositions({ symbol }) {
   try {
-    const positions = await this.client.getPositions({ symbol });
-    for (const position of positions) {
-      if (parseFloat(position.positionAmt) !== 0) {
-        await this.client.order({
-          symbol,
-          side: parseFloat(position.positionAmt) > 0 ? 'SELL' : 'BUY',
-          type: 'MARKET',
-          quantity: Math.abs(parseFloat(position.positionAmt))
-        });
-      }
-    }
+    const account = await this.client.accountInfo();
+    return account.positions.filter(
+      p => p.symbol === symbol && parseFloat(p.positionAmt) !== 0
+    );
   } catch (error) {
-    logger.error('closeAllPositions error', error);
+    logger.error('getPositions error', error);
+    return [];
   }
+}
+
+// Ajouter à l'export
+module.exports = {
+  ...,
+  getPositions
 };

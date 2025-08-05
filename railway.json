@@ -1,0 +1,18 @@
+{
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@railway/node@^3.0.0"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/.*",
+      "dest": "/app/server.js"
+    }
+  ],
+  "variables": {
+    "NODE_ENV": "production",
+    "PORT": "3000"
+  }
+}

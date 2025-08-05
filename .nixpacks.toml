@@ -1,9 +1,7 @@
 [phases.setup]
 nixPkgs = [
   "nodejs-18_x",
-  "python310",
-  "mongodb-tools",
-  "redis"
+  "python310"
 ]
 
 [phases.install]
@@ -17,3 +15,8 @@ cmds = [
 
 [start]
 cmd = "npm start"
+
+[healthcheck]
+path = "/health"
+interval = 10
+timeout = 5

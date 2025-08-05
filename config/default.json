@@ -76,3 +76,20 @@
     }
   }
 }
+{
+  // ... configuration existante ...
+  
+  "gridStrategy": {
+    "defaultLevels": 10,
+    "maxInvestmentPercentage": 20,
+    "riskManagement": {
+      "stopLossEnabled": true,
+      "maxStopLossPercentage": 5
+    },
+    "notifications": {
+      "onDeploy": true,
+      "onTrigger": true,
+      "onStopLoss": true
+    }
+  }
+}

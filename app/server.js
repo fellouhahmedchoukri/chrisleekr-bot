@@ -77,3 +77,28 @@ if (redisConfig.enabled !== false) {
 }
 const healthcheck = require('./healthcheck');
 app.use(healthcheck);
+// Diagnostic initial
+console.log("=== ENVIRONMENT ===");
+console.log(`Node.js: ${process.version}`);
+console.log(`NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
+console.log(`PORT: ${PORT}`);
+console.log("===================");
+
+// Vérification de la configuration
+try {
+  console.log("App Name:", config.get('appName'));
+  console.log("Binance Test Mode:", config.get('binance.test.apiKey') ? "Enabled" : "Disabled");
+} catch (e) {
+  console.error("❌ Configuration error:", e.message);
+  process.exit(1);
+}
+
+// Gestion des erreurs non catchées
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+});
